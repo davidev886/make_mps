@@ -31,17 +31,18 @@ def generate_mps(state_vector, cutoff=1.e-16):
 
 def compute_mutual_info_matrix(mps_psi):
         """
-        COmpute the mutual information I_{ij} where ij run on all the possible couples
+        Compute the mutual information I_{ij} where ij run on all the possible couples
         of lattice sites
         :param mps_psi: MPS
         :return: a matrix with the von neumann entropy on the diagonal and the
         mutual information on the off diagonal elements
         """
-        mutual_info_list = mps_psi.mutinf_two_site()[1]
+        indices, mutual_info_list = mps_psi.mutinf_two_site()
         entanglement_entropy = mps_psi.entanglement_entropy_segment()
         mutual_info_matrix = np.zeros((mps_psi.L, mps_psi.L))
-        mutual_info_matrix[np.triu_indices(mps_psi.L, k=1)] = mutual_info_list
-        mutual_info_matrix[np.tril_indices(mps_psi.L, k=-1)] = mutual_info_list
+        for j, ind in enumerate(indices):
+            mutual_info_matrix[ind] = mutual_info_list[j]
+        mutual_info_matrix += mutual_info_matrix.T
         mutual_info_matrix += np.diag(entanglement_entropy)
 
         return mutual_info_matrix
